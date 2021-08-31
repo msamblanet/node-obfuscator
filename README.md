@@ -1,4 +1,4 @@
-# Node Obfuscator Template
+# Node Obfuscator
 
 This repository is part of a collection of my personal node.js libraries and templates.  I am making them available to the public - feel free to offer suggestions, report issues, or make PRs via GitHub.
 

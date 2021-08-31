@@ -1,18 +1,18 @@
 {
-    "name": "@msamblanet/node-ts-template",
+    "name": "@msamblanet/node-obfuscator",
     "version": "1.0.0",
-    "private": true,
-    "description": "Template node.js project for typescript projects",
+    "private": false,
+    "description": "Node value obfuscator",
     "author": "Michael Samblanet <michael@samblanet.com>",
     "license": "Apache-2.0",
     "repository": {
         "type": "git",
-        "url": "https://github.com/msamblanet/node-ts-template.git"
+        "url": "https://github.com/msamblanet/node-obfuscator.git"
     },
     "bugs": {
-        "url": "https://github.com/msamblanet/node-ts-template/issues"
+        "url": "https://github.com/msamblanet/node-obfuscator/issues"
     },
-    "homepage": "https://github.com/msamblanet/node-ts-template",
+    "homepage": "https://github.com/msamblanet/node-obfuscator",
     "main": "dist/cjs/index.js",
     "module": "dist/mjs/index.js",
     "types": "dist/mjs/index.d.ts",
