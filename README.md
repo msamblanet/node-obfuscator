@@ -1,63 +1,114 @@
-# Node Typescript Template
+# Node Obfuscator Template
 
 This repository is part of a collection of my personal node.js libraries and templates.  I am making them available to the public - feel free to offer suggestions, report issues, or make PRs via GitHub.
 
-This project is a template node.js project for use with server-side typescript.  It provides for unit testing, typescript compilation, and debugging.  Configuration for debugging in Visual Studio Code is provided.
+This project is a class for managing the obfuscation of values to prevent accidental viewing.  If a sufficiently strong and secure password is used, the values can be considered secure.  If you rely on this, take care to ensure you follow best pratices to generate and secure the passwords used.
+
+Obfuscation is performed by using a password-based key generation and then doing a salted encryption.  The entire result is packed into a string which can be placed in a configuration file.
+
+Alogrithm details are stored in the configuration, allowing the users to customize them.
 
 ## Usage
 
-- Create a new GitHub project using the ```Use this template``` in Github
-    - If not using github, download or clone the files into your own repository
-- Review and update:
-    - [package.json](./package.json)
-    - [README.md](./README.md)
-    - [TODO.md](./TODO.md)
-    - [HISTORY.md](./HISTORY.md)
-    - [LICENSE](./LICENSE)
-- Implement your library in [src/index.ts](./src/index.ts)
-- Implement your main code in [src/main.ts](./src/main.ts)
-- Define any necessary 3rd party library typescript definitions in [src/@types](./src/@types)
-    - Delete [src/@types](./src/@types/example-module) once no longer needed
-- Implement your unit tests in [test/](./test)
-    - Unit test files should be named ```*.test.ts```
-    - Delete [test/example.test.ts](./test/example.test.ts) once no longer needed
+```
+// Use the default instance
+import obfuscator from "@msamblanet/node-obfuscator";
 
-## Features
+// Optionally configure the obfuscator
+obfuscator.configure({});
 
-- Preconfigured package.json for making both CJS and MJS style code
-- Integration with [Jest](https://jestjs.io/) for unit testing and code coverage reporting
-- Configuration with Visual Studio Code to provide debugging launch commands
-- Integration with eslint
+const obfuscated = obfuscator.encodeString("Hello world");
+const restored = obfuscator.decodeString(obfuscated);
 
-## npm run scripts available
+// You can also create your own instances
+import { Obfuscator } from "@msamblanet/node-obfuscator";
+const obfuscator = new Obfuscator(/* optional config */);
+// use obfuscator as above...
+```
 
-- ```npm run dev``` - Runs ```src/main.ts``` script locally
-- ```npm run debug``` - Runs ```src/main.ts``` script locally with the JS inspector enabled
-- ```npm run nodemon``` - Runs ```src/main.ts``` script locally via nodemon (to restart on file changes)
-    - ```npm run nodemon:debug``` - Same as nodemon but has the JS inspector enabled
-- ```npm run test``` - Runs all of the Jest unit tests
-    - ```npm run test:debug``` - Same but has the JS inspector enabled
-    - ```npm run test:watch``` - Runs all of the Jest unit tests in watch mode (to retest on changes)
-    - ```npm run test:watch:debug``` - Same but has the JS inspector enabled
-- ```npm run lint``` - Runs eslint
-    - ```npm run lint:fix``` - Runs eslint with the fix option
-- ```npm run build``` - Performs a build:clean and build:gen to build the code
-    - ```npm run build:clean``` - Deletes the dist folder
-    - ```npm run build:check``` - Runs tsc without output to verify the code
-    - ```npm run build:gen``` - Runs tsc to compile the typescript
-- prepack - This is executed just before npm packages for release.  It runs a lint, build:check, and build to generate the library for packaging.
-- ```lib:check``` - Reports on updated dependencies WITHOUT installing any
-- ```lib:update:patch``` - Update and install all available patch level updates
-- ```lib:update:minor``` - Update and install all available patch and minor level updates
-- ```lib:update:latest``` - Update and install all available dependencies to the latest version (MAY INCLUDE BREAKING CHANGES)
-- ```lib:update:doctor``` - Run NCU in "doctor" mode to update all libraries - uses unit tests to see if any individual update breaks the system
-    - For more info, run ```npx ncu --doctor```
+### Recommended Pratice
 
-## VSCode Debug Actions
+- Configure a new alogrithm name for each environment, extending from the base alogrithm
+    - Append a revision or year to the end of the name so that you can manage future alogrithm updates
+- Use an environment variable to set the password for each environment.
+    - Take care to ensure these passwords are **NEVER** committed into GIT or shared on insecure channels
+    - Developers can use dotenv to set development values for the password
+    - Operational systems can configure them via dotenv, configuration files, or local environment variables depending on how you deploy
 
-- ```Unit Tests: All``` - Runs all unit tests in the debugger
-- ```Unit Tests: Watch``` - Runs all the unit tests in watch mode in the debugger
-- ```Unit Tests: Current File``` - Runs the currently open file as a unit test in the debugger
-- ```Debug: Current File``` - Runs the current file as application code in the debugger
-- ```Debug: src/main.ts``` - Runs the main entry point in the debugger
-- ```Debug: Attach to 5858``` - Ataches the IDE to the default JS inspector port locally
+```
+// Simple example showing how to configure a dev and prod alogrithm
+require { Obfuscator } from "@msamblanet/node-obfuscator";
+const obfuscator = new Obfuscator({
+    defaultAlg: (process.NODE_ENV === "production") ? "PROD21" : "DEV21",
+    algSettings: {
+        DEV21: {
+            name: "DEV21",
+            base: "DEFAULT",
+            password: process.env.DEV_OBF_PW ?? ""
+        }
+        PROD21: {
+            name: "PROD",
+            base: "DEFAULT",
+            password: process.env.PROD_OBF_PW ?? ""
+        }
+    }
+});
+
+const myDatabasePassword = obfuscator.decodeString(myConfig.dbPasswordObfuscated);
+```
+
+## API
+
+### default
+
+The default export from the library is a singleton instance of the Obfuscator
+
+### Obfuscator.constructor(config)
+
+Constructs a new obfuscator.  You may optionally provide configuration on this call.
+
+The obfuscator may only be configured once - either by passing a ```config``` into the constructor or calling ```configure```.
+
+### Obfuscator.configure(config)
+
+Appends the provided configuration data the the object's configuration.
+
+The obfuscator may only be configured once - either by passing a ```config``` into the constructor or calling ```configure```.
+
+### Obfuscator.encodeString(val, alg): string
+
+Encodes the string ```val``` using algroithm ```alg```.  If ```alg``` is not specified, the default alogrithm is used.
+
+### Obfuscator.encodeBuffer(val, alg): string
+
+Encodes the buffer ```val``` using algroithm ```alg```.  If ```alg``` is not specified, the default alogrithm is used.
+
+### Obfuscator.decodeString(val): string
+
+Decodes the encoded string.  The alogrithm is determined from the encoded string.  The alogrithm used to encode MUST be correctly configured in the Obfuscator's config.
+
+### Obfuscator.decodeBuffer(val): Buffer
+
+Decodes the encoded buffer.  The alogrithm is determined from the encoded string.  The alogrithm used to encode MUST be correctly configured in the Obfuscator's config.
+
+### ObfuscatorConfig
+
+- defaultAlg - The default alogrithm to encode with
+- algSettings - A hash of settings for the different alogrithms
+
+### AlgSettings
+
+- name - The name of the alogrithm - must match the key used to store it in the algSettings
+- base - The name of an alogrithm to extend - if specified, any unspecified settings are inherited from the base
+    - Note that values of ```undefined``` do not override the base.  As a result, we recommend using the nullish operator in the following pattern when adding passwords:
+        - ```config.algSettings.PROD21.password ??= "";```
+        - Using this pattern will ensure the password is too short (causing it to fail if accidentally used) instead of inheriting it from the base if the value is not specified
+- notes - Optional string with notes on the alogrithm - not used programatically
+- password - Password used to derive the key - if set to a string less than 8 characters, an error will be thrown when trying to use the key
+- salt - Salt used to derive the key
+- iterations - Number of hash iterations to generate the key
+- hash - Hash alogritm used to generate the key
+- alg - Name of the cipher (per Node's crypto module)
+- stringEncoding - Encoding of the unencoded string when using ```encodeString``` and ```decodeString```
+- binEncoding - Encoding to use for the IV and encrypted data (generally base64 or hex)
+- doNotEncodeAfter - Optional - If used, set to an ISO date and the code will refuse to encode with this key on the date specified - used to help implement policies regarding the maximum age of a key

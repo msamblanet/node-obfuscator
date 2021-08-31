@@ -1,3 +1,2 @@
-# Node Typescript Template - TODO List
+# Node Obfuscator - TODO List
 
-Replace this content for your project
