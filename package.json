@@ -1,0 +1,76 @@
+{
+    "name": "@msamblanet/node-ts-template",
+    "version": "1.0.0",
+    "private": true,
+    "description": "Template node.js project for typescript projects",
+    "author": "Michael Samblanet <michael@samblanet.com>",
+    "license": "Apache-2.0",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/msamblanet/node-ts-template.git"
+    },
+    "bugs": {
+        "url": "https://github.com/msamblanet/node-ts-template/issues"
+    },
+    "homepage": "https://github.com/msamblanet/node-ts-template",
+    "main": "dist/cjs/index.js",
+    "module": "dist/mjs/index.js",
+    "types": "dist/mjs/index.d.ts",
+    "scripts": {
+        "dev": "ts-node src/main.ts",
+        "debug": "node --inspect -r ts-node/register src/main.ts",
+        "nodemon": "nodemon src/main.ts",
+        "nodemon:debug": "nodemon --inspect src/main.ts",
+        "test": "jest",
+        "test:debug": "node --inspect node_modules/jest/bin/jest.js",
+        "test:watch": "jest --watch",
+        "test:watch:debug": "node --inspect node_modules/jest/bin/jest.js --watch",
+        "lint": "eslint --ext .ts src test",
+        "lint:fix": "eslint  --fix --ext .ts src test",
+        "build": "npm run build:clean && npm run build:gen",
+        "build:clean": "del-cli dist",
+        "build:check": "npm run build:check:mjs && npm run build:check:cjs && npm run test",
+        "build:check:mjs": "tsc --noEmit",
+        "build:check:cjs": "tsc --noEmit -p tsconfig-cjs.json",
+        "build:gen": "npm run build:gen:mjs && npm run build:gen:cjs",
+        "build:gen:mjs": "tsc",
+        "build:gen:cjs": "tsc -p tsconfig-cjs.json",
+        "prepack": "npm run lint && npm run build:check && npm run build",
+        "lib:check": "ncu",
+        "lib:update:patch": "ncu -u -t patch && npm install",
+        "lib:update:minor": "ncu -u -t minor && npm install",
+        "lib:update:latest": "ncu -u -t latest && npm install",
+        "lib:update:doctor": "ncu --doctor -u -t latest"
+    },
+    "devDependencies": {
+        "@types/jest": "^27.0.1",
+        "@types/mocha": "^9.0.0",
+        "@types/node": "^16.7.8",
+        "@typescript-eslint/eslint-plugin": "^4.30.0",
+        "del-cli": "^4.0.1",
+        "dotenv": "^10.0.0",
+        "eslint": "^7.32.0",
+        "jest": "^27.1.0",
+        "nodemon": "^2.0.12",
+        "npm-check-updates": "^11.8.3",
+        "source-map-support": "^0.5.19",
+        "ts-jest": "^27.0.5",
+        "ts-node": "^10.2.1",
+        "typescript": "^4.4.2"
+    },
+    "files": [
+        "dist"
+    ],
+    "engines": {
+        "node": ">=16.7.0"
+    },
+    "nodemonConfig": {
+        "watch": [
+            "src/"
+        ],
+        "ext": "ts",
+        "execMap": {
+            "ts": "node -r ts-node/register"
+        }
+    }
+}
