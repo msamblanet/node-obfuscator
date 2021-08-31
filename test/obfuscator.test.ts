@@ -4,10 +4,9 @@ import Crypto from "crypto";
 
 const longString = "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890";
 const testBuffer = Crypto.randomBytes(100);
-const defaultAlg = Lib.defaultConfig.defaultAlg;
+const defaultAlg = Lib.Obfuscator.DEFAULT_CONFIG.defaultAlg;
 
 test("Verify Exports", () => {
-    expect(Lib.defaultConfig).not.toBeNull();
     expect(Lib.Obfuscator).not.toBeNull();
 
     expect(LibDefault).not.toBeNull();
@@ -15,10 +14,11 @@ test("Verify Exports", () => {
 });
 
 test("Verify Default Config", () => {
-    const t = Lib.defaultConfig;
+    const t = Lib.Obfuscator.DEFAULT_CONFIG;
     const t2 = t.algSettings[t.defaultAlg];
 
     // Just some basic sanity checks on the defaults
+    expect(t).not.toBeNull();
     expect(t.defaultAlg).not.toBeNull();
     expect(t.algSettings).not.toBeNull();
     expect(t2).not.toBeNull();
@@ -27,8 +27,6 @@ test("Verify Default Config", () => {
     expect(t2.password).not.toBeNull();
     expect(t2.salt).not.toBeNull();
     expect(t2.iterations).not.toBeNull();
-    expect(t2.ivLength).not.toBeNull();
-    expect(t2.keyLength).not.toBeNull();
     expect(t2.alg).not.toBeNull();
     expect(t2.stringEncoding).not.toBeNull();
     expect(t2.binEncoding).not.toBeNull();
@@ -133,3 +131,19 @@ test("Verify do not encode after", () => {
     expect(() => t.encodeBuffer(testBuffer, "foo")).toThrowError("Alg has expired for encoding: foo");
 });
 
+test("Verify password too short tests", () => {
+    let t = new Lib.Obfuscator({ algSettings: { foo: { name: "foo", base: defaultAlg, password: "123" } } });
+    expect(() => t.encodeString("foo", "foo")).toThrowError("Password is too short: foo");
+
+    t = new Lib.Obfuscator({ algSettings: { foo: { name: "foo", base: defaultAlg, password: "" } } });
+    expect(() => t.encodeString("foo", "foo")).toThrowError("Password is too short: foo");
+});
+
+test("Verify reconfigure not allowed", () => {
+    let t = new Lib.Obfuscator({});
+    expect(() => t.configure({})).toThrowError("Already configured");
+
+    t = new Lib.Obfuscator();
+    t.configure({});
+    expect(() => t.configure({})).toThrowError("Already configured");
+});

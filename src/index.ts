@@ -14,8 +14,6 @@ export interface AlgSettings {
     salt: string
     iterations: number
     hash: string
-    ivLength: number
-    keyLength: number
     alg: string
     stringEncoding: Crypto.Encoding
     binEncoding: Crypto.Encoding,
@@ -27,38 +25,39 @@ export interface ObfuscatorConfig {
     algSettings: { [key: string]: AlgSettings }
 }
 
-export const defaultConfig: ObfuscatorConfig = {
-    defaultAlg: "DEV",
-    algSettings: {
-        DEV: {
-            name: "DEV",
-            notes: "This is a default obfuscation password - it should only be used for insensitive data as anybody with source access can decode this - See README.md for recommended production usage",
-            password: "fiQ7YCt7BTQ47aDotBFxpzSfibBjiI5BX21MeMUNugPRC9RQSwjDyWd4abiq0SNwhZbVmASGC6OxrJuS",
-            salt: "zDvGZz2epkEeSbxAeMFxobCfcjG2GAHIcZZ8WX3SfEYX4g2idD3VTQsrCQIC7QsyYE4B36tRKEm1hUib",
-            iterations: 100000,
-            hash: "sha256",
-            ivLength: 16,
-            keyLength: 32,
-            alg: "aes-256-cbc",
-            stringEncoding: "utf8",
-            binEncoding: "base64",
-            doNotEncodeAfter: undefined,
+export class Obfuscator {
+    static DEFAULT_CONFIG: ObfuscatorConfig = {
+        defaultAlg: "DEFAULT",
+        algSettings: {
+            DEFAULT: {
+                name: "DEFAULT",
+                notes: "This is a default obfuscation password - it should only be used for insensitive data as anybody with source access can decode this - See README.md for recommended production usage",
+                password: "fiQ7YCt7BTQ47aDotBFxpzSfibBjiI5BX21MeMUNugPRC9RQSwjDyWd4abiq0SNwhZbVmASGC6OxrJuS",
+                salt: "zDvGZz2epkEeSbxAeMFxobCfcjG2GAHIcZZ8WX3SfEYX4g2idD3VTQsrCQIC7QsyYE4B36tRKEm1hUib",
+                iterations: 100000,
+                hash: "sha256",
+                alg: "aes-256-cbc",
+                stringEncoding: "utf8",
+                binEncoding: "base64",
+                doNotEncodeAfter: undefined,
+            }
         }
     }
-}
 
-export class Obfuscator {
-    readonly _cache: { [key: string]: Buffer } = {}
-    config: ObfuscatorConfig;
+    _cache: { [key: string]: Buffer } = {}
+    _config: ObfuscatorConfig;
+    _configLocked = false;
 
     // Create the obfuscator - optionally provide the password (default used if undefined)
     constructor(config?: RecursivePartial<ObfuscatorConfig>) {
-        this.config = extend(true, {}, defaultConfig);
-        this.configure(config);
+        this._config = this.configure(config);
+        this._configLocked = !!config; // Allow one reconfigure if we did not pass a config in...
     }
 
-    configure(config?: RecursivePartial<ObfuscatorConfig>): void {
-        const newConfig = extend(true, this.config, config); // Extend with a deep copy
+    configure(config?: RecursivePartial<ObfuscatorConfig>): ObfuscatorConfig {
+        if (this._configLocked) throw new Error("Already configured");
+
+        const newConfig = extend(true, {}, Obfuscator.DEFAULT_CONFIG, config); // Extend with a deep copy
 
         for (const alg of Object.getOwnPropertyNames(newConfig.algSettings)) {
             const algCfg = newConfig.algSettings[alg];
@@ -75,6 +74,7 @@ export class Obfuscator {
             for (const alg of Object.getOwnPropertyNames(newConfig.algSettings)) {
                 const algCfg = newConfig.algSettings[alg];
                 if (!algCfg.base) continue;
+
                 const baseCfg = newConfig.algSettings[algCfg.base];
                 if (!baseCfg) throw new Error(`Unknown alg: ${algCfg.base}`)
 
@@ -90,7 +90,11 @@ export class Obfuscator {
             if (numWithBase && !numProcessed) throw new Error("Circular dependency in alg config");
         } while (numWithBase);
 
-        this.config = newConfig;
+        this._configLocked = true;
+        this._config = newConfig;
+        this._cache = {};
+
+        return newConfig;
     }
 
     static _isAfterCheckDate(limit?: string, now: number = new Date().getTime()): boolean {
@@ -103,7 +107,8 @@ export class Obfuscator {
 
     // Generate a key for an alogritm, bypassing the cache
     generateKey(settings: AlgSettings): Buffer {
-        return Crypto.pbkdf2Sync(settings.password, settings.salt, settings.iterations, settings.keyLength, settings.hash);
+        if (settings.password.length < 8) throw new Error(`Password is too short: ${settings.name}`);
+        return Crypto.pbkdf2Sync(settings.password, settings.salt, settings.iterations, Crypto.getCipherInfo(settings.alg)?.keyLength as number, settings.hash);
     }
 
     // Looks up a key via the cache
@@ -112,7 +117,7 @@ export class Obfuscator {
     }
 
     getSettings(alg: string): AlgSettings {
-        return this.config.algSettings?.[alg];
+        return this._config.algSettings?.[alg];
     }
 
     // Encode with a specified alogrithm (default used if not specified)
@@ -123,18 +128,18 @@ export class Obfuscator {
         if (Obfuscator._isAfterCheckDate(settings.doNotEncodeAfter)) throw new Error(`Alg has expired for encoding: ${alg}`)
 
         const key = this.getKey(settings);
-        const iv = Crypto.randomBytes(settings.ivLength);
+        const iv = Crypto.randomBytes(Crypto.getCipherInfo(settings.alg)?.ivLength as number);
         const cipher = Crypto.createCipheriv(settings.alg, key, iv);
         const encoded = Buffer.concat([ cipher.update(val), cipher.final() ]);
 
         return `${alg}:${iv.toString(settings.binEncoding)}:${encoded.toString(settings.binEncoding)}`;
     }
 
-    encodeBuffer(val: Crypto.BinaryLike, alg: string = this.config.defaultAlg): string {
+    encodeBuffer(val: Crypto.BinaryLike, alg: string = this._config.defaultAlg): string {
         return this._encode(alg, val);
     }
 
-    encodeString(val: string, alg: string = this.config.defaultAlg): string {
+    encodeString(val: string, alg: string = this._config.defaultAlg): string {
         return this._encode(alg, Buffer.from(val).toString(this.getSettings(alg)?.stringEncoding));
     }
 
