@@ -1,7 +1,3 @@
-# Node Typescript Template - Revision History
+# Node Obfuscator - Revision History
 
-Replace this content for your project
-
-- 2021-08-31 - Added unit tests to default build checks
-- 2021-08-30 - Fixed patterns for jest
-- 2021-08-27 - Initial version of Template
+- 2021-08-31 - 1.0.0 - Initial release

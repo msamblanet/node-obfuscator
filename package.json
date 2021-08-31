@@ -43,6 +43,7 @@
         "lib:update:doctor": "ncu --doctor -u -t latest"
     },
     "devDependencies": {
+        "@types/extend": "^3.0.1",
         "@types/jest": "^27.0.1",
         "@types/mocha": "^9.0.0",
         "@types/node": "^16.7.8",
@@ -72,5 +73,8 @@
         "execMap": {
             "ts": "node -r ts-node/register"
         }
+    },
+    "dependencies": {
+        "extend": "^3.0.2"
     }
 }
