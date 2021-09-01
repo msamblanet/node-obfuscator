@@ -64,6 +64,17 @@ export class Obfuscator {
 
             // Sanity checks
             if (algCfg.name !== alg) throw new Error(`Name incorrectly set for alg: ${alg}`);
+
+            //
+            // Extend does not copy values if their value is undefined.  This means setting a property in an AlgConfig
+            // to undefined will result in the base value being used.
+            //
+            // If done on a password, the base password (which is likely insecure) may be used, creating a security issue.
+            //
+            // This check looks for this condition and remediates it by setting the password to "",
+            // resulting in a password-too-short error instead of accidental encryption with a possibly insecure password
+            //
+            if (config?.algSettings?.[alg]?.hasOwnProperty("password") && config?.algSettings?.[alg]?.password == null) algCfg.password = "";
         }
 
         let numWithBase = 0;

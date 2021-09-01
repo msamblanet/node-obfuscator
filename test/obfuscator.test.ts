@@ -137,6 +137,9 @@ test("Verify password too short tests", () => {
 
     t = new Lib.Obfuscator({ algSettings: { foo: { name: "foo", base: defaultAlg, password: "" } } });
     expect(() => t.encodeString("foo", "foo")).toThrowError("Password is too short: foo");
+
+    t = new Lib.Obfuscator({ algSettings: { foo: { name: "foo", base: defaultAlg, password: undefined } } });
+    expect(() => t.encodeString("foo", "foo")).toThrowError("Password is too short: foo");
 });
 
 test("Verify reconfigure not allowed", () => {
