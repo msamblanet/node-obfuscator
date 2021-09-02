@@ -1,6 +1,6 @@
 {
     "name": "@msamblanet/node-obfuscator",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "private": false,
     "description": "Node value obfuscator",
     "author": "Michael Samblanet <michael@samblanet.com>",
@@ -46,7 +46,7 @@
         "@types/extend": "^3.0.1",
         "@types/jest": "^27.0.1",
         "@types/mocha": "^9.0.0",
-        "@types/node": "^16.7.9",
+        "@types/node": "^16.7.10",
         "@typescript-eslint/eslint-plugin": "^4.30.0",
         "del-cli": "^4.0.1",
         "dotenv": "^10.0.0",
