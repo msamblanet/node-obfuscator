@@ -1,4 +1,5 @@
 # Node Obfuscator
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 This repository is part of a collection of my personal node.js libraries and templates.  I am making them available to the public - feel free to offer suggestions, report issues, or make PRs via GitHub.
 
@@ -44,12 +45,12 @@ const obfuscator = new Obfuscator({
         DEV21: {
             name: "DEV21",
             base: "DEFAULT",
-            password: process.env.DEV_OBF_PW ?? ""
+            password: process.env.DEV_OBF_PW
         }
         PROD21: {
             name: "PROD",
             base: "DEFAULT",
-            password: process.env.PROD_OBF_PW ?? ""
+            password: process.env.PROD_OBF_PW
         }
     }
 });
@@ -100,9 +101,7 @@ Decodes the encoded buffer.  The alogrithm is determined from the encoded string
 
 - name - The name of the alogrithm - must match the key used to store it in the algSettings
 - base - The name of an alogrithm to extend - if specified, any unspecified settings are inherited from the base
-    - Note that values of ```undefined``` do not override the base.  As a result, we recommend using the nullish operator in the following pattern when adding passwords:
-        - ```config.algSettings.PROD21.password ??= "";```
-        - Using this pattern will ensure the password is too short (causing it to fail if accidentally used) instead of inheriting it from the base if the value is not specified
+    - Note that except for ```password```, values of ```undefined``` do not override the base.  A special check was put in for password to avoid any unintended usage of the base key.  Take care with any other values which may be dynamically loaded.
 - notes - Optional string with notes on the alogrithm - not used programatically
 - password - Password used to derive the key - if set to a string less than 8 characters, an error will be thrown when trying to use the key
 - salt - Salt used to derive the key

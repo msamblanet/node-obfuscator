@@ -25,6 +25,8 @@ export interface ObfuscatorConfig {
     algSettings: { [key: string]: AlgSettings }
 }
 
+export type ObfuscatorConfigOverrides = RecursivePartial<ObfuscatorConfig>;
+
 export class Obfuscator {
     static DEFAULT_CONFIG: ObfuscatorConfig = {
         defaultAlg: "DEFAULT",
@@ -49,12 +51,12 @@ export class Obfuscator {
     _configLocked = false;
 
     // Create the obfuscator - optionally provide the password (default used if undefined)
-    constructor(config?: RecursivePartial<ObfuscatorConfig>) {
+    constructor(config?: ObfuscatorConfigOverrides) {
         this._config = this.configure(config);
         this._configLocked = !!config; // Allow one reconfigure if we did not pass a config in...
     }
 
-    configure(config?: RecursivePartial<ObfuscatorConfig>): ObfuscatorConfig {
+    configure(config?: ObfuscatorConfigOverrides): ObfuscatorConfig {
         if (this._configLocked) throw new Error("Already configured");
 
         const newConfig = extend(true, {}, Obfuscator.DEFAULT_CONFIG, config); // Extend with a deep copy
@@ -64,6 +66,17 @@ export class Obfuscator {
 
             // Sanity checks
             if (algCfg.name !== alg) throw new Error(`Name incorrectly set for alg: ${alg}`);
+
+            //
+            // Extend does not copy values if their value is undefined.  This means setting a property in an AlgConfig
+            // to undefined will result in the base value being used.
+            //
+            // If done on a password, the base password (which is likely insecure) may be used, creating a security issue.
+            //
+            // This check looks for this condition and remediates it by setting the password to "",
+            // resulting in a password-too-short error instead of accidental encryption with a possibly insecure password
+            //
+            if (Object.prototype.hasOwnProperty?.call(config?.algSettings?.[alg] ?? {}, "password") && config?.algSettings?.[alg]?.password == null) algCfg.password = "";
         }
 
         let numWithBase = 0;
