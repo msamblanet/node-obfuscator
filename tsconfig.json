@@ -1,41 +1,4 @@
 {
-    "compilerOptions": {
-        "module": "esnext",
-        "outDir": "dist/mjs",
-        "target": "esnext",
-        "allowJs": true,
-        "allowSyntheticDefaultImports": true,
-        "baseUrl": "src",
-        "declaration": true,
-        "esModuleInterop": true,
-        "inlineSourceMap": false,
-        "lib": [
-            "esnext"
-        ],
-        "listEmittedFiles": false,
-        "listFiles": false,
-        "moduleResolution": "node",
-        "noFallthroughCasesInSwitch": true,
-        "preserveConstEnums": true,
-        "pretty": true,
-        "removeComments": true,
-        "resolveJsonModule": true,
-        "rootDir": "src",
-        "skipLibCheck": true,
-        "sourceMap": true,
-        "strict": true,
-        "traceResolution": false,
-        "types": [
-            "node",
-            "jest"
-        ]
-    },
-    "compileOnSave": false,
-    "exclude": [
-        "node_modules",
-        "dist"
-    ],
-    "include": [
-        "src"
-    ]
+    "notes": "This config file is not used by the npm bulid - it is included for use by your IDE and other dev-time tool chains",
+    "extends": "./node_modules/@msamblanet/node-project-settings/base/tsconfig-cjs.json"
 }

@@ -13,15 +13,6 @@ Alogrithm details are stored in the configuration, allowing the users to customi
 
 ```
 // Use the default instance
-import obfuscator from "@msamblanet/node-obfuscator";
-
-// Optionally configure the obfuscator
-obfuscator.configure({});
-
-const obfuscated = obfuscator.encodeString("Hello world");
-const restored = obfuscator.decodeString(obfuscated);
-
-// You can also create your own instances
 import { Obfuscator } from "@msamblanet/node-obfuscator";
 const obfuscator = new Obfuscator(/* optional config */);
 // use obfuscator as above...
@@ -62,19 +53,11 @@ const myDatabasePassword = obfuscator.decodeString(myConfig.dbPasswordObfuscated
 
 ### default
 
-The default export from the library is a singleton instance of the Obfuscator
+The default export from the library is the Obfuscator class
 
 ### Obfuscator.constructor(config)
 
 Constructs a new obfuscator.  You may optionally provide configuration on this call.
-
-The obfuscator may only be configured once - either by passing a ```config``` into the constructor or calling ```configure```.
-
-### Obfuscator.configure(config)
-
-Appends the provided configuration data the the object's configuration.
-
-The obfuscator may only be configured once - either by passing a ```config``` into the constructor or calling ```configure```.
 
 ### Obfuscator.encodeString(val, alg): string
 
