@@ -1,4 +1,5 @@
 # http://editorconfig.org
+# Track https://github.com/editorconfig/editorconfig/issues/236 for options on moving this centrally
 root = true
 
 [*]

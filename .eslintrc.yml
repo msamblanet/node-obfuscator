@@ -1,13 +1,3 @@
 root: true
-
-parser: "@typescript-eslint/parser"
-plugins:
-    - "@typescript-eslint" # https://github.com/typescript-eslint/typescript-eslint
-
 extends:
-    - eslint:recommended
-    - plugin:@typescript-eslint/eslint-recommended
-    - plugin:@typescript-eslint/recommended
-
-rules: # off, warn, error
-    no-console: error # https://eslint.org/docs/rules/no-console
+    - ./node_modules/@msamblanet/node-project-settings/base/.eslintrc.yml
