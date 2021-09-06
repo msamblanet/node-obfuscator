@@ -10,7 +10,7 @@ test("Verify Exports", () => {
     expect(Lib.Obfuscator).not.toBeNull();
 
     expect(LibDefault).not.toBeNull();
-    expect(LibDefault).toBeInstanceOf(Lib.Obfuscator);
+    expect(LibDefault).toEqual(Lib.Obfuscator);
 });
 
 test("Verify Default Config", () => {
@@ -35,7 +35,7 @@ test("Verify Default Config", () => {
 });
 
 test("Verify Default Roundtrip", () => {
-    const t = LibDefault;
+    const t = new Lib.Obfuscator();
 
     // Test with different lengths to ensure no boundary conditions
     for (let i = 0; i < 100; i++) {
@@ -48,7 +48,7 @@ test("Verify Default Roundtrip", () => {
 });
 
 test("Verify unknown alg errors", () => {
-    const t = LibDefault;
+    const t = new Lib.Obfuscator();
 
     expect(() => t.encodeString("foo", "foo")).toThrowError("Unknown alg: foo");
     expect(() => t.encodeBuffer(testBuffer, "foo")).toThrowError("Unknown alg: foo");
@@ -58,7 +58,7 @@ test("Verify unknown alg errors", () => {
 });
 
 test("Verify format checks", () => {
-    const t = LibDefault;
+    const t = new Lib.Obfuscator();
 
     expect(() => t.decodeString("foo")).toThrowError("Malformed encoded string");
     expect(() => t.decodeBuffer("foo")).toThrowError("Malformed encoded string");
@@ -76,21 +76,32 @@ test("IsAfterDate Check", () => {
 
     expect(t._isAfterCheckDate(undefined)).toEqual(false);
 
-    expect(t._isAfterCheckDate("2020-01-01", Date.parse("2021-01-01"))).toEqual(true);
-    expect(t._isAfterCheckDate("2020-01-01", Date.parse("2020-01-02"))).toEqual(true);
-    expect(t._isAfterCheckDate("2020-01-01", Date.parse("2020-01-01"))).toEqual(true);
-    expect(t._isAfterCheckDate("2020-01-01", Date.parse("2019-12-31"))).toEqual(false);
+    const oldNow = Date.now;
+    try {
+        let now = 0;
+        Date.now = () => now;
+
+        now = Date.parse("2021-01-01");
+        expect(t._isAfterCheckDate("2020-01-01")).toEqual(true);
+        now = Date.parse("2020-01-02");
+        expect(t._isAfterCheckDate("2020-01-01")).toEqual(true);
+        now = Date.parse("2020-01-01");
+        expect(t._isAfterCheckDate("2020-01-01")).toEqual(true);
+        now = Date.parse("2019-12-31");
+        expect(t._isAfterCheckDate("2020-01-01")).toEqual(false);
+
+    } finally {
+        Date.now = oldNow;
+    }
 });
 
 test("Config check - bad name", () => {
-    const t = new Lib.Obfuscator();
-    expect(() => t.configure({ algSettings: { foo: { name: "bar" } } })).toThrowError("Name incorrectly set for alg: foo");
-    expect(() => t.configure({ algSettings: { foo: { name: "foo", base: "bar" } } })).toThrowError("Unknown alg: bar");
+    expect(() => new Lib.Obfuscator({ algSettings: { foo: { name: "bar" } } })).toThrowError("Name incorrectly set for alg: foo");
+    expect(() => new Lib.Obfuscator({ algSettings: { foo: { name: "foo", base: "bar" } } })).toThrowError("Unknown alg: bar");
 });
 
 test("Config check - Curcular Dep", () => {
-    const t = new Lib.Obfuscator();
-    expect(() => t.configure({ algSettings: { foo: { name: "foo", base: "bar" }, bar: { name: "bar", base: "foo" } } })).toThrowError("Circular dependency in alg config");
+    expect(() => new Lib.Obfuscator({ algSettings: { foo: { name: "foo", base: "bar" }, bar: { name: "bar", base: "foo" } } })).toThrowError("Circular dependency in alg config");
 });
 
 test("Verify base configuration behavior", () => {
@@ -140,13 +151,4 @@ test("Verify password too short tests", () => {
 
     t = new Lib.Obfuscator({ algSettings: { foo: { name: "foo", base: defaultAlg, password: undefined } } });
     expect(() => t.encodeString("foo", "foo")).toThrowError("Password is too short: foo");
-});
-
-test("Verify reconfigure not allowed", () => {
-    let t = new Lib.Obfuscator({});
-    expect(() => t.configure({})).toThrowError("Already configured");
-
-    t = new Lib.Obfuscator();
-    t.configure({});
-    expect(() => t.configure({})).toThrowError("Already configured");
 });
