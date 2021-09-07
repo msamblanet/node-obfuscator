@@ -1,6 +1,6 @@
 {
     "name": "@msamblanet/node-obfuscator",
-    "version": "1.2.1",
+    "version": "1.2.2",
     "private": false,
     "description": "Node value obfuscator",
     "homepage": "https://github.com/msamblanet/node-obfuscator",
@@ -57,10 +57,11 @@
         ]
     },
     "dependencies": {
+        "@msamblanet/node-config-types": "^0.1.2",
         "extend": "^3.0.2"
     },
     "devDependencies": {
-        "@msamblanet/node-project-settings": "^0.2.22",
+        "@msamblanet/node-project-settings": "^0.2.26",
         "@types/extend": "^3.0.1",
         "@types/jest": "^27.0.1",
         "@types/mocha": "^9.0.0",

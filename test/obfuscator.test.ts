@@ -5,6 +5,7 @@ import Crypto from "crypto";
 const longString = "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890";
 const testBuffer = Crypto.randomBytes(100);
 const defaultAlg = Lib.Obfuscator.DEFAULT_CONFIG.defaultAlg;
+const defaultPw = Lib.Obfuscator.DEFAULT_CONFIG.algSettings[defaultAlg].password;
 
 test("Verify Exports", () => {
     expect(Lib.Obfuscator).not.toBeNull();
@@ -105,7 +106,7 @@ test("Config check - Curcular Dep", () => {
 });
 
 test("Verify base configuration behavior", () => {
-    const t = new Lib.Obfuscator({ algSettings: { foo: { name: "foo", base: defaultAlg }, bar: { name: "bar", base: "foo", password: "UnitTests" } } });
+    const t = new Lib.Obfuscator({ algSettings: { foo: { name: "foo", base: defaultAlg, password: defaultPw }, bar: { name: "bar", base: "foo", password: "UnitTests" } } });
 
     {
         const enc = t.encodeString(longString, "foo");
@@ -150,5 +151,8 @@ test("Verify password too short tests", () => {
     expect(() => t.encodeString("foo", "foo")).toThrowError("Password is too short: foo");
 
     t = new Lib.Obfuscator({ algSettings: { foo: { name: "foo", base: defaultAlg, password: undefined } } });
+    expect(() => t.encodeString("foo", "foo")).toThrowError("Password is too short: foo");
+
+    t = new Lib.Obfuscator({ algSettings: { foo: { name: "foo", base: defaultAlg } } });
     expect(() => t.encodeString("foo", "foo")).toThrowError("Password is too short: foo");
 });

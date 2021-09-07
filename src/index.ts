@@ -1,12 +1,8 @@
 import Crypto from "crypto";
 import extend from "extend";
+import { Config, Override, BaseConfigurable } from "@msamblanet/node-config-types";
 
-// https://stackoverflow.com/questions/41980195/recursive-partialt-in-typescript
-export type RecursivePartial<T> = {
-    [P in keyof T]?: RecursivePartial<T[P]>;
-};
-
-export interface AlgSettings {
+export interface AlgSettings extends Config {
     name: string
     base?: string
     notes?: string
@@ -20,14 +16,13 @@ export interface AlgSettings {
     doNotEncodeAfter?: string // ISO encoded date - "2030-12-31"
 }
 
-export interface ObfuscatorConfig {
+export interface ObfuscatorConfig extends Config {
     defaultAlg: string,
     algSettings: { [key: string]: AlgSettings }
 }
+export type ObfuscatorConfigOverride = Override<ObfuscatorConfig>;
 
-export type ObfuscatorConfigOverrides = null | undefined | RecursivePartial<ObfuscatorConfig>;
-
-export class Obfuscator {
+export class Obfuscator extends BaseConfigurable<ObfuscatorConfig> {
     public static DEFAULT_CONFIG: ObfuscatorConfig = {
         defaultAlg: "DEFAULT",
         algSettings: {
@@ -47,62 +42,47 @@ export class Obfuscator {
     }
 
     protected readonly cache: { [key: string]: Buffer } = {}
-    protected readonly config: ObfuscatorConfig;
+    protected algSettings: { [key: string]: AlgSettings } = {};
 
     // Create the obfuscator - optionally provide the password (default used if undefined)
-    public constructor(...config: ObfuscatorConfigOverrides[]) {
-        this.config = this.configure(...config);
+    public constructor(...config: ObfuscatorConfigOverride[]) {
+        super(Obfuscator.DEFAULT_CONFIG, ...config);
+        this.configure();
     }
 
-    protected configure(...configOverrides: ObfuscatorConfigOverrides[]): ObfuscatorConfig {
-        const newConfig = extend(true, {}, Obfuscator.DEFAULT_CONFIG, ...configOverrides); // Extend with a deep copy
-
-        for (const alg of Object.getOwnPropertyNames(newConfig.algSettings)) {
-            const algCfg = newConfig.algSettings[alg];
-
-            // Sanity checks
-            if (algCfg.name !== alg) throw new Error(`Name incorrectly set for alg: ${alg}`);
-
-            //
-            // Extend does not copy values if their value is undefined.  This means setting a property in an AlgConfig
-            // to undefined will result in the base value being used.
-            //
-            // If done on a password, the base password (which is likely insecure) may be used, creating a security issue.
-            //
-            // This check looks for this condition and remediates it by setting the password to "",
-            // resulting in a password-too-short error instead of accidental encryption with a possibly insecure password
-            //
-            for (const config of configOverrides) {
-                if (Object.prototype.hasOwnProperty?.call(config?.algSettings?.[alg] ?? {}, "password"))
-                    algCfg.password = config?.algSettings?.[alg]?.password ?? "";
-            }
-        }
-
+    protected configure(): void {
         let numWithBase = 0;
         do {
             let numProcessed = 0;
             numWithBase = 0;
 
-            for (const alg of Object.getOwnPropertyNames(newConfig.algSettings)) {
-                const algCfg = newConfig.algSettings[alg];
-                if (!algCfg.base) continue;
+            for (const alg of Object.getOwnPropertyNames(this.config.algSettings)) {
+                const algCfg = this.config.algSettings[alg];
 
-                const baseCfg = newConfig.algSettings[algCfg.base];
-                if (!baseCfg) throw new Error(`Unknown alg: ${algCfg.base}`)
+                // Ignore if already processed
+                if (this.algSettings[alg]) continue;
 
-                if (!baseCfg.base) {
-                    numProcessed++;
-                    delete algCfg.base;
-                    newConfig.algSettings[alg] = extend(true, {}, baseCfg, algCfg);
-                } else {
+                // Don't process if we have not yet processed the base alg
+                if (algCfg.base && !this.algSettings[algCfg.base]) {
+                    if (!this.config.algSettings[algCfg.base]) throw new Error(`Unknown alg: ${algCfg.base}`);
                     numWithBase++;
+                    continue;
                 }
+
+                numProcessed++;
+
+                // Sanity checks
+                if (algCfg.name !== alg) throw new Error(`Name incorrectly set for alg: ${alg}`);
+
+                // Lookup base
+                const baseCfg = algCfg.base ? this.algSettings[algCfg.base] : undefined;
+
+                // Extend and add in
+                this.algSettings[alg] = extend(true, {}, baseCfg, { password: "" }, algCfg, { base: "" });
             }
 
             if (numWithBase && !numProcessed) throw new Error("Circular dependency in alg config");
         } while (numWithBase);
-
-        return newConfig;
     }
 
     public static _isAfterCheckDate(limit?: string): boolean {
@@ -125,7 +105,7 @@ export class Obfuscator {
     }
 
     protected getSettings(alg: string): AlgSettings {
-        return this.config.algSettings?.[alg];
+        return this.algSettings[alg];
     }
 
     // Encode with a specified alogrithm (default used if not specified)
@@ -180,5 +160,4 @@ export class Obfuscator {
         return this._decode(val).data;
     }
 }
-
 export default Obfuscator;
