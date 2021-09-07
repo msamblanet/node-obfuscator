@@ -1,5 +1,8 @@
 # Node Obfuscator - Revision History
 
+- 2021-09-07 - 1.1.2 Release
+    - Bumpped node-project-settings version for testing
+    - Fix package version
 - 2021-09-06 - 1.1.1 Release
     - Migrated to node-project-settings
     - Configuration and Testing consistency cleanups
