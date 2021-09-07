@@ -1,6 +1,6 @@
 {
     "name": "@msamblanet/node-obfuscator",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "private": false,
     "description": "Node value obfuscator",
     "homepage": "https://github.com/msamblanet/node-obfuscator",
@@ -64,8 +64,8 @@
         "@types/extend": "^3.0.1",
         "@types/jest": "^27.0.1",
         "@types/mocha": "^9.0.0",
-        "@types/node": "^16.7.10",
-        "@typescript-eslint/eslint-plugin": "^4.30.0",
+        "@types/node": "^16.7.13",
+        "@typescript-eslint/eslint-plugin": "^4.31.0",
         "del-cli": "^4.0.1",
         "dotenv": "^10.0.0",
         "eslint": "^7.32.0",
