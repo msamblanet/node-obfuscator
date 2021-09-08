@@ -22,3 +22,6 @@ coverage
 
 # Sensitive data
 .env
+
+# Local Config files
+/config/local*
