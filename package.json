@@ -1,6 +1,6 @@
 {
     "name": "@msamblanet/node-obfuscator",
-    "version": "1.2.4",
+    "version": "2.0.0",
     "private": false,
     "description": "Node value obfuscator",
     "homepage": "https://github.com/msamblanet/node-obfuscator",
@@ -13,69 +13,120 @@
     },
     "license": "Apache-2.0",
     "author": "Michael Samblanet <michael@samblanet.com>",
-    "main": "dist/cjs/index.js",
-    "module": "dist/mjs/index.js",
-    "types": "dist/mjs/index.d.ts",
+    "type": "module",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
     "files": [
         "dist"
     ],
     "scripts": {
-        "dev": "ts-node src/main.ts",
-        "debug": "node --inspect -r ts-node/register src/main.ts",
+        "applyProjectTemplate": "applyProjectTemplate",
+        "build": "npm run build:clean && npm run build:gen",
+        "build:check": "tsc --noEmit",
+        "build:check:cjs": "tsc --noEmit -p ./node_modules/@msamblanet/node-project-settings/base/tsconfig-cjs.json",
+        "build:check:mjs": "tsc --noEmit -p ./node_modules/@msamblanet/node-project-settings/base/tsconfig-mjs.json",
+        "build:clean": "del-cli dist",
+        "build:gen": "tsc",
+        "build:gen:cjs": "tsc -p ./node_modules/@msamblanet/node-project-settings/base/tsconfig-cjs.json",
+        "build:gen:mjs": "tsc -p ./node_modules/@msamblanet/node-project-settings/base/tsconfig-mjs.json",
+        "debug": "node --inspect --loader ts-node/esm src/main.ts",
+        "dev": "node --loader ts-node/esm src/main.ts",
+        "lib:check": "ncu",
+        "lib:unused": "npx depcheck",
+        "lib:update:doctor": "ncu --doctor -u -t latest",
+        "lib:update:latest": "ncu -u -t latest && npm install",
+        "lib:update:minor": "ncu -u -t minor && npm install",
+        "lib:update:patch": "ncu -u -t patch && npm install",
+        "lint": "xo",
+        "lint:fix": "xo --fix",
         "nodemon": "nodemon src/main.ts",
         "nodemon:debug": "nodemon --inspect src/main.ts",
-        "test": "jest",
-        "test:open": "opener \"./coverage/lcov-report/index.html\"",
-        "test:debug": "node --inspect node_modules/jest/bin/jest.js",
-        "test:watch": "jest --watch",
-        "test:watch:debug": "node --inspect node_modules/jest/bin/jest.js --watch",
-        "lint": "eslint --ext .ts src test",
-        "lint:fix": "eslint  --fix --ext .ts src test",
-        "build": "npm run build:clean && npm run build:gen",
-        "build:clean": "del-cli dist",
-        "build:check": "npm run build:check:mjs && npm run build:check:cjs && npm run test",
-        "build:check:mjs": "tsc --noEmit -p ./node_modules/@msamblanet/node-project-settings/base/tsconfig-mjs.json",
-        "build:check:cjs": "tsc --noEmit -p ./node_modules/@msamblanet/node-project-settings/base/tsconfig-cjs.json",
-        "build:gen": "npm run build:gen:mjs && npm run build:gen:cjs",
-        "build:gen:mjs": "tsc -p ./node_modules/@msamblanet/node-project-settings/base/tsconfig-mjs.json",
-        "build:gen:cjs": "tsc -p ./node_modules/@msamblanet/node-project-settings/base/tsconfig-cjs.json",
         "prepack": "npm run lint && npm run build:check && npm run build",
-        "lib:check": "ncu",
-        "lib:update:patch": "ncu -u -t patch && npm install",
-        "lib:update:minor": "ncu -u -t minor && npm install",
-        "lib:update:latest": "ncu -u -t latest && npm install",
-        "lib:update:doctor": "ncu --doctor -u -t latest",
-        "applyProjectTemplate": "applyProjectTemplate"
+        "prod:init": "npm ci --only=production",
+        "prod:start": "node dist/main.js",
+        "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+        "test:debug": "node --experimental-vm-modules --inspect node_modules/jest/bin/jest.js",
+        "test:open": "opener \"./coverage/lcov-report/index.html\"",
+        "test:watch": "jest --watch",
+        "test:watch:debug": "node --inspect node_modules/jest/bin/jest.js --watch"
     },
     "nodemonConfig": {
         "execMap": {
-            "ts": "node -r ts-node/register"
+            "ts": "node --loader ts-node/esm"
         },
-        "ext": "ts",
+        "ext": "ts,js",
         "watch": [
             "src/"
         ]
     },
+    "xo": {
+        "rules": {
+            "comma-dangle": "off",
+            "object-curly-spacing": [
+                "error",
+                "always"
+            ],
+            "@typescript-eslint/comma-dangle": "off",
+            "@typescript-eslint/object-curly-spacing": [
+                "error",
+                "always"
+            ],
+            "@typescript-eslint/naming-convention": "off",
+            "unicorn/filename-case": [
+                "error",
+                {
+                    "cases": {
+                        "camelCase": true,
+                        "pascalCase": true
+                    }
+                }
+            ],
+            "capitalized-comments": "off",
+            "@typescript-eslint/class-literal-property-style": [
+                "error",
+                "fields"
+            ]
+        },
+        "space": 2
+    },
+    "jest": {
+        "collectCoverage": true,
+        "collectCoverageFrom": [
+            "<rootDir>/src/**/*.{ts,js}"
+        ],
+        "coverageDirectory": "coverage",
+        "coverageThreshold": {
+            "global": {
+                "branches": 100,
+                "functions": 100,
+                "lines": 100,
+                "statements": 100
+            }
+        },
+        "globals": {
+            "ts-jest": {
+                "useESM": true
+            }
+        },
+        "moduleNameMapper": {
+            "^(\\.{1,2}/.*)\\.js$": "$1"
+        },
+        "preset": "ts-jest/presets/default-esm",
+        "testEnvironment": "node",
+        "testPathIgnorePatterns": [
+            "<rootDir>/node_modules/",
+            "<rootDir>/dist/"
+        ],
+        "testRegex": "/test/.*\\.test\\.(?:js|ts)",
+        "verbose": false
+    },
     "dependencies": {
-        "@msamblanet/node-config-types": "^0.2.1",
+        "@msamblanet/node-config-types": "^0.3.1",
         "extend": "^3.0.2"
     },
     "devDependencies": {
-        "@msamblanet/node-project-settings": "^0.3.2",
-        "@types/extend": "^3.0.1",
-        "@types/jest": "^27.0.1",
-        "@types/node": "^16.9.0",
-        "@typescript-eslint/eslint-plugin": "^4.31.0",
-        "del-cli": "^4.0.1",
-        "eslint": "^7.32.0",
-        "jest": "^27.1.1",
-        "nodemon": "^2.0.12",
-        "npm-check-updates": "^11.8.5",
-        "opener": "^1.5.2",
-        "source-map-support": "^0.5.19",
-        "ts-jest": "^27.0.5",
-        "ts-node": "^10.2.1",
-        "typescript": "^4.4.2"
+        "@msamblanet/node-project-template": "^0.6.2",
+        "@types/extend": "^3.0.1"
     },
     "engines": {
         "node": ">=16.7.0"
