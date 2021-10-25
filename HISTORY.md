@@ -1,3 +1,8 @@
 # Node Obfuscator - Revision History
 
+- 2021-10-24 - v2.0.0 - Version bump
+  - Migrate to @msamblanet/node-project-template
+  - Dependency bumps
+  - BREAKING: Type name changes for consistency
+
 - 2021-09-07 - Initial release

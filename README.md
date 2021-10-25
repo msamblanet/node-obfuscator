@@ -84,7 +84,8 @@ Decodes the encoded buffer.  The alogrithm is determined from the encoded string
 
 - name - The name of the alogrithm - must match the key used to store it in the algSettings
 - base - The name of an alogrithm to extend - if specified, any unspecified settings are inherited from the base
-    - Note that except for ```password```, values of ```undefined``` do not override the base.  A special check was put in for password to avoid any unintended usage of the base key.  Take care with any other values which may be dynamically loaded.
+    - Note that values of ```undefined``` do not override the base.
+    - Note that the value of ```password``` is NOT inherited to prevent accidental use of an insecure password.
 - notes - Optional string with notes on the alogrithm - not used programatically
 - password - Password used to derive the key - if set to a string less than 8 characters, an error will be thrown when trying to use the key
 - salt - Salt used to derive the key
