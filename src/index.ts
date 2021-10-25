@@ -132,7 +132,10 @@ export class Obfuscator extends BaseConfigurable<IObfuscatorConfig> {
 
     const algInfo = Crypto.getCipherInfo(settings.alg);
     /* istanbul ignore next */
-    if (!algInfo) throw new Error(`Unknonwn cipher: ${settings.alg}`);
+    if (!algInfo) {
+      throw new Error(`Unknonwn cipher: ${settings.alg}`);
+    }
+
     return Crypto.pbkdf2Sync(settings.password, settings.salt, settings.iterations, algInfo.keyLength, settings.hash);
   }
 
@@ -158,7 +161,10 @@ export class Obfuscator extends BaseConfigurable<IObfuscatorConfig> {
 
     const algInfo = Crypto.getCipherInfo(settings.alg);
     /* istanbul ignore next */
-    if (!algInfo) throw new Error(`Unknonwn cipher: ${settings.alg}`);
+    if (!algInfo) {
+      throw new Error(`Unknonwn cipher: ${settings.alg}`);
+    }
+
     /* istanbul ignore next */
     const ivLength = algInfo.ivLength ?? 16;
 
