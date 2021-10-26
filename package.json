@@ -20,35 +20,29 @@
         "dist"
     ],
     "scripts": {
-        "applyProjectTemplate": "applyProjectTemplate",
-        "build": "npm run build:clean && npm run build:gen",
-        "build:check": "tsc --noEmit",
-        "build:check:cjs": "tsc --noEmit -p ./node_modules/@msamblanet/node-project-settings/base/tsconfig-cjs.json",
-        "build:check:mjs": "tsc --noEmit -p ./node_modules/@msamblanet/node-project-settings/base/tsconfig-mjs.json",
-        "build:clean": "del-cli dist",
-        "build:gen": "tsc",
-        "build:gen:cjs": "tsc -p ./node_modules/@msamblanet/node-project-settings/base/tsconfig-cjs.json",
-        "build:gen:mjs": "tsc -p ./node_modules/@msamblanet/node-project-settings/base/tsconfig-mjs.json",
-        "debug": "node --inspect --loader ts-node/esm src/main.ts",
-        "dev": "node --loader ts-node/esm src/main.ts",
-        "lib:check": "ncu",
-        "lib:unused": "npx depcheck",
-        "lib:update:doctor": "ncu --doctor -u -t latest",
-        "lib:update:latest": "ncu -u -t latest && npm install",
-        "lib:update:minor": "ncu -u -t minor && npm install",
-        "lib:update:patch": "ncu -u -t patch && npm install",
-        "lint": "xo",
-        "lint:fix": "xo --fix",
-        "nodemon": "nodemon src/main.ts",
-        "nodemon:debug": "nodemon --inspect src/main.ts",
-        "prepack": "npm run lint && npm run build:check && npm run build",
-        "prod:init": "npm ci --only=production",
-        "prod:start": "node dist/main.js",
-        "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
-        "test:debug": "node --experimental-vm-modules --inspect node_modules/jest/bin/jest.js",
-        "test:open": "opener \"./coverage/lcov-report/index.html\"",
-        "test:watch": "jest --watch",
-        "test:watch:debug": "node --inspect node_modules/jest/bin/jest.js --watch"
+      "dev": "node --loader ts-node/esm src/main.ts",
+      "debug": "node --inspect --loader ts-node/esm src/main.ts",
+      "nodemon": "nodemon src/main.ts",
+      "prod:init": "npm ci --only=production",
+      "prod:start": "node dist/main.js",
+      "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+      "test:open": "opener \"./coverage/lcov-report/index.html\"",
+      "test:debug": "node --inspect --experimental-vm-modules node_modules/jest/bin/jest.js",
+      "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js -- watch",
+      "lint": "xo",
+      "lint:fix": "xo --fix",
+      "build": "npm run build:clean && npm run build:gen",
+      "build:clean": "del-cli dist",
+      "build:check": "tsc --noEmit",
+      "build:gen": "tsc",
+      "prepack": "npm run lint && npm run build:check && npm run build",
+      "lib:check": "ncu",
+      "lib:update:patch": "ncu -u -t patch && npm install",
+      "lib:update:minor": "ncu -u -t minor && npm install",
+      "lib:update:latest": "ncu -u -t latest && npm install",
+      "lib:update:doctor": "ncu --doctor -u -t latest",
+      "lib:unused": "npx depcheck",
+      "applyProjectTemplate": "applyProjectTemplate"
     },
     "nodemonConfig": {
         "execMap": {
@@ -121,11 +115,11 @@
         "verbose": false
     },
     "dependencies": {
-        "@msamblanet/node-config-types": "^0.3.1",
+        "@msamblanet/node-config-types": "^0.3.2",
         "extend": "^3.0.2"
     },
     "devDependencies": {
-        "@msamblanet/node-project-template": "^0.6.2",
+        "@msamblanet/node-project-template": "^0.7.0",
         "@types/extend": "^3.0.1"
     },
     "engines": {
