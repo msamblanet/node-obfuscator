@@ -1,5 +1,8 @@
 # Node Obfuscator - Revision History
 
+- ????
+  - Add NPM badge to readme
+
 - 2021-10-26 - v2.0.1
   - Dependency updates
 
