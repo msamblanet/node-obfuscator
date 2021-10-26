@@ -1,6 +1,6 @@
 {
     "name": "@msamblanet/node-obfuscator",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "private": false,
     "description": "Node value obfuscator",
     "homepage": "https://github.com/msamblanet/node-obfuscator",
