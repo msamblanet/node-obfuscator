@@ -115,7 +115,7 @@
         "verbose": false
     },
     "dependencies": {
-        "@msamblanet/node-config-types": "^0.3.2",
+        "@msamblanet/node-config-types": "^0.4.0",
         "extend": "^3.0.2"
     },
     "devDependencies": {
